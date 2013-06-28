@@ -1,0 +1,402 @@
+<html>
+<head>
+<title>Mouse Brain Viewer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="css/reset.css" />
+<link rel="stylesheet" type="text/css" href="css/jquery-ui-1.9.2.custom.css" />
+<link rel="stylesheet" type="text/css" href="css/main.css" />
+<link rel="stylesheet" type="text/css" href="css/sliding-panel.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="css/jqtree.css">
+<link rel="stylesheet" type="text/css" href="css/jqtree.extend.css">
+<link rel="stylesheet" type="text/css" href="css/atlas-selector.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="css/viewer.css" />
+
+
+<link rel="stylesheet" type="text/css" href="css/mousebrain-selector.css" media="screen" />
+
+
+
+<script src="js/jquery-1.8.3.min.js"></script>
+<script src="js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="js/jquery.ui.slider.js"></script>
+<script src="js/tree.jquery.js"></script>
+<script src="js/jquery.sliding-panel.js"></script>
+<script src="js/jquery.sliding-panel.volume.js"></script>
+
+<script src="js/jquery.mousebrain-selector.js"></script> 
+<script src="mouse_js_functions.js"></script>
+
+
+<script src='js/x.mousecontroller.js'></script>
+<script src='js/x.mouseviewer3d.js'></script>
+<script src='js/x.mouseviewer2d.js'></script>
+
+
+<script src="js/xtk.js"></script>
+<!-- <script src="js/xtk_scene.js"></script>-->
+<script src="js/mouse_xtk_scene.js"></script>
+
+<script type="text/javascript">
+
+var myOptions = {
+    val1 : 'text1',
+        val2 : 'text2'
+        };
+        var mySelect = $('#mySelect');
+        $.each(myOptions, function(val, text) {
+            mySelect.append(
+                    $('<option></option>').val(val).html(text)
+                        );
+                        });
+
+
+</script>
+
+</head>
+<body>
+
+	<!--header bar-->
+	<div id="banner">
+		<h1>GBM Mouse Viewer
+			<button class="camera_reset_btn" onclick="resetCameraPos('axial')">
+				<img src='gfx/view_axial.png'/>
+			</button>
+			<button  class="camera_reset_btn" onclick="resetCameraPos('coronal')">
+				<img src='gfx/view_coronal.png'/>
+			</button>
+			<button  class="camera_reset_btn" onclick="resetCameraPos('sagittal')">
+				<img src='gfx/view_sagittal.png'/>
+			</button>
+			<button class="camera_reset_btn" >
+				<img src='gfx/home.png' height=20 />
+			</button>
+		</h1>
+	</div>
+
+	<!--3D slice rendering-->
+	<div id='3d' class='threeDRenderer'>
+	</div>
+
+	<!--2D slice viewers-->
+	<div id='twoD_viewer_header'>
+		<h1 id='anatomy_caption'>No Label Selected</h1>
+	</div>
+	<div id='sliceX' class='twoDRenderer'>
+		<div id='yellow_slider'></div>
+	</div>
+	<div id='sliceY' class='twoDRenderer'>
+		<div id='red_slider'></div>
+	</div>
+	<div id='sliceZ' class='twoDRenderer'>
+		<div id='green_slider'></div>
+	</div>
+	<!--/2D slice viewers-->
+
+	<!--sliding panels-->
+	<div class="panel">
+	
+	
+
+
+		<!--MRI volume panel-->
+		<div class="panel_volume">
+
+			<!--orthogonal slice toggles-->
+			<h1>Slice Planes</h1>
+			<input type="checkbox" id="axial_slice_toggle" checked="checked" />
+			<label for="axial_slice_toggle">
+				<img src='gfx/axial_slice.jpg' width="50px" />
+				<br />
+				<span>axial</span>
+			</label>
+			<br/>
+			<br/>
+			<input type="checkbox" id="coronal_slice_toggle" checked="checked" />
+			<label for="coronal_slice_toggle">
+				<img src='gfx/coronal_slice.jpg' width="50px" />
+				<br />
+				<span>coronal</span>
+			</label>
+			<br/>
+			<br/>
+			<input type="checkbox" id="sagittal_slice_toggle" checked="checked" />
+			<label for="sagittal_slice_toggle">
+				<img src='gfx/sagittal_slice.jpg' width="50px" />
+				<br/>
+				<span>sagittal</span>
+			</label>
+			<br/>
+			<br/>
+
+			<!--orthogonal slice toggles-->
+			<h1>3D Volume</h1>
+			<input type="checkbox" id="3d_render_toggle" />
+			<label for="3d_render_toggle">
+				<img src='gfx/3d.png' width="50px" />
+				<br/>
+				<span>render</span>
+			</label>
+			<br/>
+			<br/>
+
+			<!--image controls-->
+			<h1>Image Levels</h1>
+			<label for="image_control_threshold">Threshold:</label>
+			<div id="image_control_threshold"></div>
+			<br/>
+			<label for="image_control_brightness">Window/Level:</label>
+			<div id="image_control_brightness"></div>
+			<br/>
+			<label for="image_control_opacity">Opacity:</label>
+			<div id="image_control_opacity"></div>
+			<br/>
+
+			<div style="clear: both;"></div>
+		</div>
+		<!--/MRI volume panel-->
+
+		<!--label maps panel-->
+		<div class="panel_labels">
+
+ 
+<p>
+  <label for="sliceX_val">Slice X value:</label>
+  <input type="text" id="sliceX_val" style="border: 0; color: #f6931f; font-weight: bold;" size="4"/>
+</p>
+<p>
+  <label for="sliceY_val">Slice Y value:</label>
+  <input type="text" id="sliceY_val" style="border: 0; color: #f6931f; font-weight: bold;" size="4"/>
+</p>
+<p>
+  <label for="sliceZ_val">Slice Z value:</label>
+  <input type="text" id="sliceZ_val" style="border: 0; color: #f6931f; font-weight: bold;" size="4"/>
+</p> 
+ 
+<p>
+  <label for="slices_in_X">Number of X slices:</label>
+  <input type="text" id="slices_in_X" style="border: 0; color: #f6931f; font-weight: bold;" size="4"/>
+</p>
+<p>
+  <label for="slices_in_Y">Number of Y slices:</label>
+  <input type="text" id="slices_in_Y" style="border: 0; color: #f6931f; font-weight: bold;" size="4" />
+</p>
+<p>
+  <label for="slices_in_Z">Number of Z slices:</label>
+  <input type="text" id="slices_in_Z" style="border: 0; color: #f6931f; font-weight: bold;" size="4" />
+</p>
+
+		
+		<p>
+			<label for="mousebrain_id">MouseBrain ID:</label>
+			<input type="text" id="current_id" style="border: 0; color: #f6931f; font-weight: bold;" />
+		</p>
+		
+		<!-- Original functions in label panel
+		
+			<h1>Label Maps</h1>
+			<br/>
+			<input type="checkbox" id="label_hover_select" checked="checked" />
+			<label for="label_hover_select">
+				<span>Hover Select</span>
+			</label>
+			<button id="show_all_labels">Show All</button>
+			<button id="hide_all_labels">Hide All</button>
+			<br/>
+			<br/>
+			<div id="label_tree"></div>
+			<h1>Controls</h1>
+			<label for="label_control_opacity">Opacity:</label>
+			<br/>
+			<div id="label_control_opacity"></div>
+			<div style="clear: both;"></div>
+		-->
+			
+			
+		</div>
+
+		<!--3D mesh panel-->
+		<div class="panel_mesh">
+			<h1>Surfaces</h1>
+			<div id="mesh_tree"></div>
+			<h1>Controls</h1>
+			<label for="mesh_control_opacity">Opacity:</label>
+			<div id="mesh_control_opacity"></div>
+			<div style="clear: both;"></div>
+		</div>
+		
+		
+		
+		
+		
+		<!--Brain Selector Panel-->
+		<div class="panel_brain_selector">
+			<h1>Brains go here</h1>
+			<button onClick="add_sphere">Check for sphere</button>
+			
+		<h1>Brain Selector</h1>
+
+
+		<select>
+		  <option value="C1_R2">C1_R2</option>
+	    	<option value="C2_R3">C2_R3</option>
+	      	<option value="C1_R1">C1_R1</option>
+	        </select>
+	        
+	        		
+			
+  <script>
+
+  $(function() {
+    $( "#mousebrain-selector-slider" ).slider({
+      orientation: "vertical",
+      value: 0,
+      min: 0,
+      max: _MOUSEBRAINID_.steps.length-1,
+      step: 1,
+      slide: function( event, ui ) {
+        $( "#current_id" ).val( _MOUSEBRAINID_.valueOf().steps[_MOUSEBRAINID_.currentVolume] );
+		$("#mousebrain-selector-age").val( _MOUSEBRAINID_.steps[ui.value] );
+		_MOUSEBRAINID_.volumes[_MOUSEBRAINID_.currentVolume].visible = false;
+		var _volume = _MOUSEBRAINID_.volumes[ui.value];
+
+		    if (!_volume) {
+
+		      // volume was not loaded before
+		      console.log('Loading '+_MOUSEBRAINID_.steps[ui.value] )
+		      _volume = new X.volume();
+		      _volume.file = 'Tumors/' + _MOUSEBRAINID_.steps[ui.value] + '.nii.gz';
+  			console.log('Loading '+'Tumors/' + _MOUSEBRAINID_.steps[ui.value] + '.nii.gz' )
+			    
+
+		      _volume.labelmap.file = 'data/80/labelmap.nii.gz';
+//		      _volume.labelmap.file = 'data/' + _MOUSEBRAINID_.steps[ui.value] + '/labelmap.nii.gz';
+		      _volume.labelmap.colortable.file = 'data/colortable.txt';
+
+		      r0.add(_volume);
+
+		      // store it in the cache
+		      _MOUSEBRAINID_.volumes[ui.value] = _volume;
+	        _MOUSEBRAINID_.currentVolume = ui.value;
+
+		    } else {
+
+	        _MOUSEBRAINID_.currentVolume = ui.value;
+
+		      init_viewer2d();
+		    }
+
+		    _volume.visible = true;
+        _volume.labelmap.opacity = 0;
+
+		}
+	});
+	$("#mousebrain-selector-age").val($("#mousebrain-selector-slider").slider("value"));
+	
+   });
+  </script>
+
+
+MOUSE BRAIN SLIDER GOES HERE!!! 
+<p>
+  <label for="mousebrain_id">Selected MRI:</label>
+  <input type="text" id="mousebrain-selector-age" style="border: 0; color: #f6931f; font-weight: bold;" />
+</p>
+ 
+<!-- <div id="mousebrain-selector-slider" style="width: 200px;"></div>-->
+ <!-- slider or likely a dropbox should go here to change slides .... -->
+ 
+</body>
+</html>
+
+
+
+		
+
+			
+<!--			<div id="mesh_tree"></div>
+			<h1>Controls</h1>
+			<label for="mesh_control_opacity">Opacity:</label>
+			<div id="mesh_control_opacity"></div>
+			<div style="clear: both;"></div>
+		-->
+		</div>
+		
+
+	</div>
+	
+	
+		
+	</div>
+	<!--/sliding panels-->
+
+	<!--sliding panel triggers-->
+	<a class="panel_trigger" id="trigger_volume" target="panel_volume" href="#"><div class="panel_trigger_text">Slices</div></a>
+
+	<a class="panel_trigger" id="trigger_brain_switch" target="panel_brain_selector" href="#"><div class="panel_trigger_text">Pick MRI</div></a>
+	
+
+	<a class="panel_trigger" id="trigger_labels" target="panel_labels" href="#"><div class="panel_trigger_text">Slice Info</div></a>
+
+
+	<!--/sliding panel triggers-->
+	
+
+	<!--atlas selector-->
+	
+	<!--/atlas selector-->
+<!--	<div id="mousebrain-selector">
+		<div id="mousebrain-selector-slider"></div>
+		<div class="mousebrain-selector-steps">
+			<span class="mousebrain-selector-tick">|<br/>C1</span>
+			<span class="mousebrain-selector-tick" style="left: 25%;">|<br/>C2</span>
+			<span class="mousebrain-selector-tick" style="left: 50%;">|<br/>C3</span>
+			<span class="mousebrain-selector-tick" style="left: 75%;">|<br/>C4</span>
+			<span class="mousebrain-selector-tick" style="left: 100%;">|<br/>C5</span>
+		</div>
+		<p>
+			<label for="mousebrain_id">MouseBrain ID:</label>
+			<input type="text" id="mousebrain-selector-age" readonly />
+		</p>
+	</div> -->
+
+
+</body>
+</html>
+
+
+<!--
+
+
+				<html>
+<head>
+  <script>
+  $(function() {
+    $( "#slider-vertical" ).slider({
+      orientation: "vertical",
+      value:100,
+      min: 0,
+      max: 500,
+      step: 50,
+      slide: function( event, ui ) {
+        $( "#mri" ).val( ui.value );
+      }
+    });
+    $( "#mri" ).val( $( "#slider-vertical" ).slider( "value" ) );
+  });
+  </script>
+</head>
+<body>
+ 
+<p>
+  <label for="mri">Selected MRI:</label>
+  <input type="text" id="mri" style="border: 15; color: #f6931f; font-weight: bold;" />
+</p>
+ 
+<div id="slider-vertical" style="height: 400px;"></div>
+ 
+ 
+</body>
+</html>
+
+
+
