@@ -10,10 +10,7 @@
 <link rel="stylesheet" type="text/css" href="css/jqtree.extend.css">
 <link rel="stylesheet" type="text/css" href="css/atlas-selector.css" media="screen" />
 <link rel="stylesheet" type="text/css" href="css/viewer.css" />
-
-
 <link rel="stylesheet" type="text/css" href="css/mousebrain-selector.css" media="screen" />
-
 
 
 <script src="js/jquery-1.8.3.min.js"></script>
@@ -33,28 +30,81 @@
 
 
 <script src="js/xtk.js"></script>
-<!-- <script src="js/xtk_scene.js"></script>-->
 <script src="js/mouse_xtk_scene.js"></script>
 
 <script type="text/javascript">
 
 var myOptions = {
     val1 : 'text1',
-        val2 : 'text2'
-        };
-        var mySelect = $('#mySelect');
-        $.each(myOptions, function(val, text) {
-            mySelect.append(
-                    $('<option></option>').val(val).html(text)
-                        );
-                        });
-
+    val2 : 'text2'
+     };
+   var mySelect = $('#mySelect');
+    $.each(myOptions, function(val, text) {
+       mySelect.append(
+     $('<option></option>').val(val).html(text)
+              );
+          });
 
 </script>
 
-</head>
-<body>
 
+
+  <script>
+
+  $(function() {
+    $( "#mousebrain-selector-slider" ).slider({
+      orientation: "vertical",
+      value: 0,
+      min: 0,
+      max: _MOUSEBRAINID_.steps.length-1,
+      step: 1,
+      slide: function( event, ui ) {
+        $( "#current_id" ).val( _MOUSEBRAINID_.valueOf().steps[_MOUSEBRAINID_.currentVolume] );
+		$("#mousebrain-selector-age").val( _MOUSEBRAINID_.steps[ui.value] );
+		_MOUSEBRAINID_.volumes[_MOUSEBRAINID_.currentVolume].visible = false;
+		var _volume = _MOUSEBRAINID_.volumes[ui.value];
+
+		    if (!_volume) {
+
+		      // volume was not loaded before
+		      console.log('Loading '+_MOUSEBRAINID_.steps[ui.value] )
+		      _volume = new X.volume();
+		      _volume.file = 'Tumors/' + _MOUSEBRAINID_.steps[ui.value] + '.nii.gz';
+  			console.log('Loading '+'Tumors/' + _MOUSEBRAINID_.steps[ui.value] + '.nii.gz' )
+			    
+
+		      _volume.labelmap.file = 'data/80/labelmap.nii.gz';
+//		      _volume.labelmap.file = 'data/' + _MOUSEBRAINID_.steps[ui.value] + '/labelmap.nii.gz';
+		      _volume.labelmap.colortable.file = 'data/colortable.txt';
+
+		      r0.add(_volume);
+
+		      // store it in the cache
+		      _MOUSEBRAINID_.volumes[ui.value] = _volume;
+	        _MOUSEBRAINID_.currentVolume = ui.value;
+
+		    } else {
+
+	        _MOUSEBRAINID_.currentVolume = ui.value;
+
+		      init_viewer2d();
+		    }
+
+		    _volume.visible = true;
+        _volume.labelmap.opacity = 0;
+
+		}
+	});
+	$("#mousebrain-selector-age").val($("#mousebrain-selector-slider").slider("value"));
+	
+   });
+  </script>
+  
+  
+
+</head>
+
+<body>
 	<!--header bar-->
 	<div id="banner">
 		<h1>GBM Mouse Viewer
@@ -94,9 +144,6 @@ var myOptions = {
 
 	<!--sliding panels-->
 	<div class="panel">
-	
-	
-
 
 		<!--MRI volume panel-->
 		<div class="panel_volume">
@@ -224,10 +271,6 @@ var myOptions = {
 			<div style="clear: both;"></div>
 		</div>
 		
-		
-		
-		
-		
 		<!--Brain Selector Panel-->
 		<div class="panel_brain_selector">
 			<h1>Brains go here</h1>
@@ -235,65 +278,14 @@ var myOptions = {
 			
 		<h1>Brain Selector</h1>
 
-
 		<select>
 		  <option value="C1_R2">C1_R2</option>
 	    	<option value="C2_R3">C2_R3</option>
 	      	<option value="C1_R1">C1_R1</option>
-	        </select>
-	        
+        </select>
 	        		
 			
-  <script>
 
-  $(function() {
-    $( "#mousebrain-selector-slider" ).slider({
-      orientation: "vertical",
-      value: 0,
-      min: 0,
-      max: _MOUSEBRAINID_.steps.length-1,
-      step: 1,
-      slide: function( event, ui ) {
-        $( "#current_id" ).val( _MOUSEBRAINID_.valueOf().steps[_MOUSEBRAINID_.currentVolume] );
-		$("#mousebrain-selector-age").val( _MOUSEBRAINID_.steps[ui.value] );
-		_MOUSEBRAINID_.volumes[_MOUSEBRAINID_.currentVolume].visible = false;
-		var _volume = _MOUSEBRAINID_.volumes[ui.value];
-
-		    if (!_volume) {
-
-		      // volume was not loaded before
-		      console.log('Loading '+_MOUSEBRAINID_.steps[ui.value] )
-		      _volume = new X.volume();
-		      _volume.file = 'Tumors/' + _MOUSEBRAINID_.steps[ui.value] + '.nii.gz';
-  			console.log('Loading '+'Tumors/' + _MOUSEBRAINID_.steps[ui.value] + '.nii.gz' )
-			    
-
-		      _volume.labelmap.file = 'data/80/labelmap.nii.gz';
-//		      _volume.labelmap.file = 'data/' + _MOUSEBRAINID_.steps[ui.value] + '/labelmap.nii.gz';
-		      _volume.labelmap.colortable.file = 'data/colortable.txt';
-
-		      r0.add(_volume);
-
-		      // store it in the cache
-		      _MOUSEBRAINID_.volumes[ui.value] = _volume;
-	        _MOUSEBRAINID_.currentVolume = ui.value;
-
-		    } else {
-
-	        _MOUSEBRAINID_.currentVolume = ui.value;
-
-		      init_viewer2d();
-		    }
-
-		    _volume.visible = true;
-        _volume.labelmap.opacity = 0;
-
-		}
-	});
-	$("#mousebrain-selector-age").val($("#mousebrain-selector-slider").slider("value"));
-	
-   });
-  </script>
 
 
 MOUSE BRAIN SLIDER GOES HERE!!! 
@@ -305,20 +297,10 @@ MOUSE BRAIN SLIDER GOES HERE!!!
 <!-- <div id="mousebrain-selector-slider" style="width: 200px;"></div>-->
  <!-- slider or likely a dropbox should go here to change slides .... -->
  
-</body>
-</html>
 
 
 
-		
 
-			
-<!--			<div id="mesh_tree"></div>
-			<h1>Controls</h1>
-			<label for="mesh_control_opacity">Opacity:</label>
-			<div id="mesh_control_opacity"></div>
-			<div style="clear: both;"></div>
-		-->
 		</div>
 		
 
@@ -331,72 +313,9 @@ MOUSE BRAIN SLIDER GOES HERE!!!
 
 	<!--sliding panel triggers-->
 	<a class="panel_trigger" id="trigger_volume" target="panel_volume" href="#"><div class="panel_trigger_text">Slices</div></a>
-
 	<a class="panel_trigger" id="trigger_brain_switch" target="panel_brain_selector" href="#"><div class="panel_trigger_text">Pick MRI</div></a>
-	
-
 	<a class="panel_trigger" id="trigger_labels" target="panel_labels" href="#"><div class="panel_trigger_text">Slice Info</div></a>
 
-
-	<!--/sliding panel triggers-->
-	
-
-	<!--atlas selector-->
-	
-	<!--/atlas selector-->
-<!--	<div id="mousebrain-selector">
-		<div id="mousebrain-selector-slider"></div>
-		<div class="mousebrain-selector-steps">
-			<span class="mousebrain-selector-tick">|<br/>C1</span>
-			<span class="mousebrain-selector-tick" style="left: 25%;">|<br/>C2</span>
-			<span class="mousebrain-selector-tick" style="left: 50%;">|<br/>C3</span>
-			<span class="mousebrain-selector-tick" style="left: 75%;">|<br/>C4</span>
-			<span class="mousebrain-selector-tick" style="left: 100%;">|<br/>C5</span>
-		</div>
-		<p>
-			<label for="mousebrain_id">MouseBrain ID:</label>
-			<input type="text" id="mousebrain-selector-age" readonly />
-		</p>
-	</div> -->
-
-
 </body>
 </html>
-
-
-<!--
-
-
-				<html>
-<head>
-  <script>
-  $(function() {
-    $( "#slider-vertical" ).slider({
-      orientation: "vertical",
-      value:100,
-      min: 0,
-      max: 500,
-      step: 50,
-      slide: function( event, ui ) {
-        $( "#mri" ).val( ui.value );
-      }
-    });
-    $( "#mri" ).val( $( "#slider-vertical" ).slider( "value" ) );
-  });
-  </script>
-</head>
-<body>
- 
-<p>
-  <label for="mri">Selected MRI:</label>
-  <input type="text" id="mri" style="border: 15; color: #f6931f; font-weight: bold;" />
-</p>
- 
-<div id="slider-vertical" style="height: 400px;"></div>
- 
- 
-</body>
-</html>
-
-
 
